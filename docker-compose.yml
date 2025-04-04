@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  blacklist_service:
+    build: ./blacklist_service
+    ports:
+      - "5000:5000"
+    environment:
+      - BASE_APP_PATH=/app/togotrek/postfix
+      - API_KEY=550e8400-e29b-41d4-a716-446655440000
+      - LOG_DIR=/app/togotrek/postfix/logs
+    volumes:
+      - logs:/app/togotrek/postfix/logs
+      - data:/app/togotrek/postfix/data
+      - ./blacklist_service/sender_blacklist:/app/togotrek/postfix/sender_blacklist
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  smtp_proxy:
+    build:
+      context: smtp_proxy
+      dockerfile: Dockerfile
+    ports:
+      - "2525:2525"
+    environment:
+      - HOSTNAME=smtp.togotrek.com
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=ben@togotrek.com
+      - SMTP_PASS=mxozequwvmluzqaw
+      - API_URL=http://blacklist_service:5000
+      - API_KEY=550e8400-e29b-41d4-a716-446655440000
+      - LOG_DIR=/var/log/postfix
+      - HEALTH_CHECK_INTERVAL=300
+    volumes:
+      - logs:/var/log/postfix
+      - data:/var/lib/postfix
+    depends_on:
+      - blacklist_service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "postfix", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  logs:
+  data:
