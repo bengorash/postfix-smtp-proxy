@@ -1,9 +1,18 @@
+# Postfix master process configuration file
+
+# ==========================================================================
+# service type  private unpriv  chroot  wakeup  maxproc command + args
+#               (yes)   (yes)   (no)    (never) (100)
+# ==========================================================================
+# SMTP on port 2525 (external facing port)
 2525      inet  n       -       n       -       -       smtpd
   -o smtpd_tls_wrappermode=no
   -o smtpd_sasl_auth_enable=no
 
+# Standard SMTP service
 smtp      inet  n       -       n       -       -       smtpd
 
+# Standard Postfix processes
 pickup    unix  n       -       n       60      1       pickup
 cleanup   unix  n       -       n       -       0       cleanup
 qmgr      unix  n       -       n       300     1       qmgr
@@ -27,3 +36,14 @@ virtual   unix  -       n       n       -       -       virtual
 lmtp      unix  -       -       n       -       -       lmtp
 anvil     unix  -       -       n       -       1       anvil
 scache    unix  -       -       n       -       1       scache
+
+# Policy service for blacklist checking
+# More reliable than direct TCP connections
+policy    unix  -       n       n       -       0       spawn
+  user=nobody argv=/usr/local/bin/blacklist_policy.py
+
+# For using XCLIENT extension with PostSRSd
+submission inet n       -       n       -       -       smtpd
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_client_restrictions=permit_sasl_authenticated,reject

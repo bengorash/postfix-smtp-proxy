@@ -18,11 +18,12 @@ RUN apt-get update && apt-get install -y \
     nano \
     iputils-ping \
     netcat \
+    dnsutils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
-RUN pip3 install requests
+RUN pip3 install requests tenacity
 
 # Create necessary directories
 RUN mkdir -p /var/log/supervisor \
@@ -53,9 +54,17 @@ RUN chmod 600 /etc/postfix/key.pem \
 RUN mkdir -p /var/spool/postfix/etc \
     && cp /etc/services /var/spool/postfix/etc/services \
     && cp /etc/resolv.conf /var/spool/postfix/etc/resolv.conf \
+    && cp /etc/hosts /var/spool/postfix/etc/hosts \
     && mkdir -p /var/spool/postfix/pid \
     && chown -R postfix:root /var/spool/postfix/ \
     && chmod 755 /var/spool/postfix/
+
+# Add network diagnostic tools for debugging
+RUN apt-get update && apt-get install -y \
+    net-tools \
+    tcpdump \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Expose SMTP port
 EXPOSE 2525

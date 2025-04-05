@@ -2,6 +2,7 @@ version: '3.8'
 services:
   blacklist_service:
     build: ./blacklist_service
+    container_name: blacklist_service  # Fixed container name for consistent DNS
     ports:
       - "5000:5000"
     environment:
@@ -13,6 +14,8 @@ services:
       - data:/app/togotrek/postfix/data
       - ./blacklist_service/sender_blacklist:/app/togotrek/postfix/sender_blacklist
     restart: unless-stopped
+    networks:
+      - postfix_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
@@ -38,9 +41,13 @@ services:
     volumes:
       - logs:/var/log/postfix
       - data:/var/lib/postfix
+      - ./smtp_proxy/scripts/blacklist_policy.py:/usr/local/bin/blacklist_policy.py
     depends_on:
-      - blacklist_service
+      blacklist_service:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - postfix_net
     healthcheck:
       test: ["CMD", "postfix", "status"]
       interval: 30s
@@ -50,3 +57,7 @@ services:
 volumes:
   logs:
   data:
+
+networks:
+  postfix_net:
+    driver: bridge
