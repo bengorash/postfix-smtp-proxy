@@ -1,3 +1,12 @@
+#!/bin/bash
+# Script to fix the Postfix setup issue
+
+# 1. First, stop all containers
+echo "Stopping existing containers..."
+docker-compose down
+
+# 2. Replace the Dockerfile with the fixed version
+cat > smtp_proxy/Dockerfile << 'EOF'
 FROM ubuntu:22.04
 
 # Set noninteractive installation
@@ -63,3 +72,19 @@ EXPOSE 2525
 
 # Set the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
+EOF
+
+
+chmod +x smtp_proxy/scripts/entrypoint.sh
+chmod +x smtp_proxy/scripts/health_monitor.py
+chmod +x smtp_proxy/scripts/container-diagnostic.sh
+
+
+# 3. Rebuild and restart the containers
+echo "Rebuilding and starting containers..."
+docker-compose build --no-cache
+docker-compose up -d
+
+# 4. Check the logs
+echo "Checking logs (press Ctrl+C to exit)..."
+docker-compose logs -f

@@ -1,4 +1,4 @@
-# Minimal Postfix master.cf
+# Postfix master process configuration file
 # ==========================================================================
 # service type  private unpriv  chroot  wakeup  maxproc command + args
 # ==========================================================================
@@ -30,3 +30,5 @@ virtual   unix  -       n       n       -       -       virtual
 lmtp      unix  -       -       n       -       -       lmtp
 anvil     unix  -       -       n       -       1       anvil
 scache    unix  -       -       n       -       1       scache
+# Added for compatibility with newer Postfix versions
+postlog   unix-dgram n  -       n       -       1       postlogd
