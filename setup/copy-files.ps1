@@ -1,4 +1,4 @@
-$sourceDir = "E:\Projects\TogoTrek\postfix-smtp-gateway\postfix"  # Local directory with files and folders
+$sourceDir = "C:\Users\VeniaminGorash\AppData\Local\Temp\postfix\postfix"  # Local directory with files and folders
 $remoteUser = "VeniaminGorash"                                    # VM username
 $remoteInstance = "smtp-proxy"                                    # VM instance name
 $remoteBasePath = "/app/togotrek/postfix/"                                # Base destination path on VM

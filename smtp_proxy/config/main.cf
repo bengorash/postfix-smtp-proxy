@@ -26,33 +26,20 @@ smtpd_tls_received_header = yes
 
 smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
 
-# Updated to use specific IP for policy service if hostname resolution fails
-# Note: This fallback method ensures service continues if DNS resolution fails
+# Simplified recipient restrictions - remove the policy service for now to get Postfix working
 smtpd_recipient_restrictions =
-    check_policy_service unix:private/policy,
     permit_mynetworks,
     reject_unauth_destination
 
-# Add this master.cf service for the policy check
-# This approach is more reliable than direct TCP connection
-policy_time_limit = 3600s
-
-maillog_file = /var/log/postfix/postfix.log
+# For debugging purposes
 debug_peer_level = 2
-debug_peer_list = blacklist_service
+maillog_file = /var/log/postfix/postfix.log
 
-# Required for proper DNS resolution in chroot
-smtp_host_lookup = dns
-disable_dns_lookups = no
-
-# Additional safety settings for a proxy server
-strict_rfc821_envelopes = yes
-smtpd_helo_required = yes
-smtpd_delay_reject = yes
-
-# Add banner and disable biff
-smtpd_banner = $myhostname ESMTP Postfix
+# The minimal required settings to make Postfix start
 biff = no
 append_dot_mydomain = no
 readme_directory = no
 compatibility_level = 2
+
+# Allow connection from all clients initially
+smtpd_client_restrictions = permit

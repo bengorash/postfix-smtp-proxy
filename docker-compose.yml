@@ -2,7 +2,7 @@ version: '3.8'
 services:
   blacklist_service:
     build: ./blacklist_service
-    container_name: blacklist_service  # Fixed container name for consistent DNS
+    container_name: blacklist_service
     ports:
       - "5000:5000"
     environment:
@@ -21,6 +21,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 10s  # Give it time to start up before failing healthchecks
 
   smtp_proxy:
     build:
@@ -41,18 +42,17 @@ services:
     volumes:
       - logs:/var/log/postfix
       - data:/var/lib/postfix
-      - ./smtp_proxy/scripts/blacklist_policy.py:/usr/local/bin/blacklist_policy.py
     depends_on:
-      blacklist_service:
-        condition: service_healthy
+      - blacklist_service
     restart: unless-stopped
     networks:
       - postfix_net
     healthcheck:
-      test: ["CMD", "postfix", "status"]
+      test: ["CMD-SHELL", "postfix status || exit 1"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
+      start_period: 20s  # Give it time to start up before failing healthchecks
 
 volumes:
   logs:

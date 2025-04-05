@@ -29,6 +29,7 @@ BLACKLIST = load_blacklist()
 
 @app.route('/health')
 def health():
+    """Health check endpoint that must return 'healthy' for Docker health checks"""
     logger.info("Health check requested")
     return "healthy\n", 200
 
