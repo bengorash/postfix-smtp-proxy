@@ -18,15 +18,16 @@ services:
       - postfix_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
+      interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s  # Give it time to start up before failing healthchecks
+      start_period: 5s
 
   smtp_proxy:
     build:
-      context: smtp_proxy
+      context: ./smtp_proxy
       dockerfile: Dockerfile
+    container_name: smtp_proxy
     ports:
       - "2525:2525"
     environment:
@@ -48,11 +49,11 @@ services:
     networks:
       - postfix_net
     healthcheck:
-      test: ["CMD-SHELL", "postfix status || exit 1"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "postconf", "mail_version"]
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 20s  # Give it time to start up before failing healthchecks
+      start_period: 10s
 
 volumes:
   logs:

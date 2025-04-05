@@ -1,45 +1,31 @@
+# Minimal Postfix configuration
 myhostname = smtp.togotrek.com
 mydomain = togotrek.com
 myorigin = $mydomain
 inet_interfaces = all
 inet_protocols = ipv4
-mydestination = $myhostname, localhost.$mydomain, localhost
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 mynetworks = 127.0.0.0/8, 172.0.0.0/8, 192.168.0.0/16, 10.0.0.0/8
 
-relayhost = [smtp.gmail.com]:587
-smtp_sasl_auth_enable = yes
-smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
-smtp_sasl_security_options = noanonymous
-smtp_sasl_mechanism_filter = plain, login
+# Set maillog file
+maillog_file = /var/log/postfix/postfix.log
 
-smtp_use_tls = yes
-smtp_tls_security_level = encrypt
-smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-
+# Enable TLS for incoming connections
 smtpd_tls_cert_file = /etc/postfix/cert.pem
 smtpd_tls_key_file = /etc/postfix/key.pem
 smtpd_tls_security_level = may
-smtpd_tls_auth_only = no
-smtpd_tls_protocols = !SSLv2, !SSLv3
 smtpd_tls_loglevel = 1
-smtpd_tls_received_header = yes
 
-smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
+# Relay to Gmail
+relayhost = [smtp.gmail.com]:587
+smtp_use_tls = yes
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
 
-# Simplified recipient restrictions - remove the policy service for now to get Postfix working
-smtpd_recipient_restrictions =
-    permit_mynetworks,
-    reject_unauth_destination
+# Basic restrictions
+smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination
 
-# For debugging purposes
-debug_peer_level = 2
-maillog_file = /var/log/postfix/postfix.log
-
-# The minimal required settings to make Postfix start
+# Other required settings
 biff = no
-append_dot_mydomain = no
-readme_directory = no
 compatibility_level = 2
-
-# Allow connection from all clients initially
-smtpd_client_restrictions = permit

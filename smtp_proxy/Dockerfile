@@ -1,9 +1,9 @@
 FROM ubuntu:22.04
 
-# Set noninteractive installation to avoid prompts
+# Set noninteractive installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Postfix and supporting tools
+# Install Postfix and supporting tools in a single layer
 RUN apt-get update && apt-get install -y \
     postfix \
     postfix-pcre \
@@ -19,25 +19,21 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     netcat \
     dnsutils \
+    net-tools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
-RUN pip3 install requests tenacity
+RUN pip3 install --no-cache-dir requests tenacity
 
 # Create necessary directories
 RUN mkdir -p /var/log/supervisor \
-    && mkdir -p /usr/local/bin
+    /var/log/postfix \
+    /usr/local/bin \
+    /var/spool/postfix/pid \
+    /var/spool/postfix/etc
 
-# Copy scripts first and set their permissions
-COPY scripts/blacklist_policy.py /usr/local/bin/
-COPY scripts/health_monitor.py /usr/local/bin/
-COPY scripts/entrypoint.sh /
-RUN chmod 755 /usr/local/bin/blacklist_policy.py \
-    && chmod 755 /usr/local/bin/health_monitor.py \
-    && chmod 755 /entrypoint.sh
-
-# Copy configuration files
+# Copy configuration files first
 COPY config/main.cf /etc/postfix/main.cf
 COPY config/master.cf /etc/postfix/master.cf
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -46,25 +42,19 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY cert.pem /etc/postfix/cert.pem
 COPY key.pem /etc/postfix/key.pem
 
-# Set certificate permissions
-RUN chmod 600 /etc/postfix/key.pem \
-    && chmod 644 /etc/postfix/cert.pem
+# Copy scripts and set permissions
+COPY scripts/blacklist_policy.py /usr/local/bin/
+COPY scripts/health_monitor.py /usr/local/bin/
+COPY scripts/entrypoint.sh /
 
-# Prepare Postfix environment
-RUN mkdir -p /var/spool/postfix/etc \
-    && cp /etc/services /var/spool/postfix/etc/services \
-    && cp /etc/resolv.conf /var/spool/postfix/etc/resolv.conf \
-    && cp /etc/hosts /var/spool/postfix/etc/hosts \
-    && mkdir -p /var/spool/postfix/pid \
+# Set permissions in a single layer
+RUN chmod 755 /usr/local/bin/blacklist_policy.py \
+    && chmod 755 /usr/local/bin/health_monitor.py \
+    && chmod 755 /entrypoint.sh \
+    && chmod 600 /etc/postfix/key.pem \
+    && chmod 644 /etc/postfix/cert.pem \
     && chown -R postfix:root /var/spool/postfix/ \
     && chmod 755 /var/spool/postfix/
-
-# Add network diagnostic tools for debugging
-RUN apt-get update && apt-get install -y \
-    net-tools \
-    tcpdump \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 # Expose SMTP port
 EXPOSE 2525
