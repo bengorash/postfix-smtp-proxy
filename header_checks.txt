@@ -1,0 +1,7 @@
+# Detect loops
+/^Received:.*togotrek\.com.*togotrek\.com/ REJECT Message loop detected
+/^X-Loop: togotrek.com/ REJECT Message loop detected
+
+# Add tracking headers
+/^To:/ PREPEND X-Loop: togotrek.com
+/^Received:/ PREPEND X-Processed: Processed by $myhostname at $smtp_date

@@ -1,0 +1,1 @@
+/@togotrek.com/     ${user}+relay@togotrek.com

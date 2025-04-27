@@ -1,0 +1,2 @@
+smtp inet n - n - 20 smtpd
+  -o smtpd_verbose=yes

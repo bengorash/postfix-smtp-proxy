@@ -1,0 +1,23 @@
+smtpd_banner = $myhostname ESMTP $mail_name
+myhostname = mail.togotrek.com
+mydomain = togotrek.com
+myorigin = $mydomain
+inet_interfaces = all
+mydestination = $myhostname, localhost.$mydomain, localhost
+
+# Relay settings
+relay_domains = !togotrek.com, !gmail.com
+transport_maps = hash:/etc/postfix/transport
+
+# Rewriting and header checks
+recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+header_checks = regexp:/etc/postfix/header_checks
+
+# Blacklist restrictions
+smtpd_recipient_restrictions =
+    check_sender_access hash:/etc/postfix/blacklist
+    permit_mynetworks
+    reject_unauth_destination
+
+# Logging
+smtpd_log_access = yes
