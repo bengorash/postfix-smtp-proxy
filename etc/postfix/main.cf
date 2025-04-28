@@ -19,5 +19,6 @@ smtpd_recipient_restrictions =
     permit_mynetworks
     reject_unauth_destination
 
-# Logging
-smtpd_log_access = yes
+# Compatibility and logging
+compatibility_level = 2
+syslog_facility = mail
