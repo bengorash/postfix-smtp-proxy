@@ -10,7 +10,10 @@ RUN echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set
 # Install Postfix, rsyslog, and SASL dependencies
 RUN apt-get update && \
     apt-get install -y postfix rsyslog libsasl2-modules ca-certificates && \
-    apt-get clean
+    apt-get clean && \
+    # Ensure Postfix directories are created
+    mkdir -p /var/spool/postfix /var/log/postfix && \
+    chown postfix:postfix /var/spool/postfix /var/log/postfix
 
 # Create mail.log and set permissions
 RUN mkdir -p /var/log && \
@@ -37,17 +40,20 @@ RUN postmap /etc/postfix/sasl_passwd && \
 COPY etc/postfix/rsyslog.conf /etc/rsyslog.d/postfix.conf
 
 # Create required Postfix directories and set permissions
-RUN mkdir -p /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private && \
-    chown root:root /var/spool/postfix /var/spool/postfix/* && \
-    chmod 755 /var/spool/postfix /var/spool/postfix/*
+RUN mkdir -p /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private /var/spool/postfix/hold && \
+    chown root:root /var/spool/postfix /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private && \
+    chmod 755 /var/spool/postfix /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private && \
+    chown postfix:postfix /var/spool/postfix/hold && \
+    chmod 700 /var/spool/postfix/hold
 
 # Configure rsyslog
-RUN echo "module(load=\"imuxsock\")" > /etc/rsyslog.conf && \
-    sed -i 's/#module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf && \
-    sed -i 's/#input(type="imudp" port="514")/input(type="imudp" port="514")/' /etc/rsyslog.conf
+RUN echo "module(load=\"imuxsock\")\nmodule(load=\"imudp\")\ninput(type=\"imudp\" port=\"514\")" > /etc/rsyslog.conf && \
+    echo "*.* /var/log/syslog" >> /etc/rsyslog.conf && \
+    chmod 644 /etc/rsyslog.conf /etc/rsyslog.d/postfix.conf && \
+    chown root:root /etc/rsyslog.conf /etc/rsyslog.d/postfix.conf
 
 # Expose SMTP port
 EXPOSE 25
 
-# Start rsyslog and Postfix, keep container running
-CMD ["/bin/bash", "-c", "service rsyslog start && postfix start && tail -f /var/log/mail.log"]
+# Start rsyslog and Postfix, keep container running for debugging
+CMD ["/bin/bash", "-c", "service rsyslog start && (postfix start || (echo 'Postfix failed to start' && tail -f /var/log/mail.log))"]
