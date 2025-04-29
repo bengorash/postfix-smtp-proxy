@@ -1,30 +1,25 @@
-# Postfix configuration for SMTP proxy with loop detection
-# Basic configuration
-myhostname = localhost
-mydomain = localdomain
+smtpd_banner = $myhostname ESMTP $mail_name
+myhostname = mail.togotrek.com
+mydomain = togotrek.com
 myorigin = $mydomain
 inet_interfaces = all
-inet_protocols = all
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 172.0.0.0/8 192.168.0.0/16
+mydestination = $myhostname, localhost.$mydomain, localhost
 
-# Recipient address rewriting to prevent loops
-recipient_canonical_classes = envelope_recipient
-recipient_canonical_maps = hash:/etc/postfix/recipient_canonical
-
-# Add headers for loop detection
-header_checks = regexp:/etc/postfix/header_checks
-
-# Relay transport map
+# Relay settings
+relay_domains = !togotrek.com, !gmail.com
 transport_maps = hash:/etc/postfix/transport
 
-# Blacklist checking
+# Rewriting and header checks
+recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+header_checks = regexp:/etc/postfix/header_checks
+
+# Blacklist restrictions
 smtpd_recipient_restrictions =
-    check_recipient_access hash:/etc/postfix/blacklist,
-    permit_mynetworks,
+    check_sender_access hash:/etc/postfix/blacklist
+    permit_mynetworks
     reject_unauth_destination
 
-# Logging
-maillog_file = /var/log/mail.log
+# Compatibility and logging
+compatibility_level = 2
+syslog_facility = mail
 debug_peer_level = 3
-debug_peer_list = blacklist_service
