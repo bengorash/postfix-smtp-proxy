@@ -24,20 +24,22 @@ RUN rm -rf /etc/postfix/* && \
 
 # Copy Postfix configuration files
 COPY etc/postfix/main.cf /etc/postfix/main.cf
+COPY etc/postfix/master.cf /etc/postfix/master.cf
 COPY etc/postfix/sasl_passwd /etc/postfix/sasl_passwd
 COPY etc/postfix/header_checks /etc/postfix/header_checks
 
-# Configure SASL password map and header checks
+# Configure SASL password map
 RUN postmap /etc/postfix/sasl_passwd && \
     chmod 600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db && \
-    chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db && \
-    postmap /etc/postfix/header_checks
+    chown root:root /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 
 # Copy rsyslog configuration
 COPY etc/postfix/rsyslog.conf /etc/rsyslog.d/postfix.conf
 
-# Create required Postfix directories
-RUN mkdir -p /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private
+# Create required Postfix directories and set permissions
+RUN mkdir -p /var/spool/postfix/pid /var/spool/postfix/etc /var/spool/postfix/public /var/spool/postfix/private && \
+    chown root:root /var/spool/postfix /var/spool/postfix/* && \
+    chmod 755 /var/spool/postfix /var/spool/postfix/*
 
 # Configure rsyslog
 RUN echo "module(load=\"imuxsock\")" > /etc/rsyslog.conf && \
@@ -47,5 +49,5 @@ RUN echo "module(load=\"imuxsock\")" > /etc/rsyslog.conf && \
 # Expose SMTP port
 EXPOSE 25
 
-# Start rsyslog and Postfix
+# Start rsyslog and Postfix, keep container running
 CMD ["/bin/bash", "-c", "service rsyslog start && postfix start && tail -f /var/log/mail.log"]
