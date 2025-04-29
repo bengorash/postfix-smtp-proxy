@@ -1,1 +1,1 @@
-smtp inet n - y - 20 smtpd -v
+smtp inet n - n - 20 smtpd -v
