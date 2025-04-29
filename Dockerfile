@@ -1,8 +1,8 @@
 FROM ubuntu:20.04
 
-# Install Postfix and rsyslog
+# Install Postfix, rsyslog, and dependencies
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y postfix rsyslog && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y postfix rsyslog libterm-readline-perl-perl && \
     apt-get install -y --reinstall postfix && \
     postconf -e 'inet_interfaces = all' && \
     apt-get clean
@@ -12,6 +12,10 @@ RUN mkdir -p /var/log && \
     touch /var/log/mail.log && \
     chmod 644 /var/log/mail.log && \
     chown syslog:adm /var/log/mail.log
+
+# Clean default Postfix configs
+RUN rm -rf /etc/postfix/* && \
+    mkdir -p /etc/postfix
 
 # Copy Postfix configuration files
 COPY etc/postfix/main.cf /etc/postfix/main.cf
@@ -43,4 +47,4 @@ RUN echo "module(load=\"imuxsock\")" > /etc/rsyslog.conf && \
 EXPOSE 25
 
 # Start rsyslog and Postfix
-CMD ["/bin/bash", "-c", "service rsyslog start && /usr/sbin/postfix start && tail -f /var/log/mail.log"]
+CMD ["/bin/bash", "-c", "service rsyslog start && postfix start && tail -f /var/log/mail.log"]
