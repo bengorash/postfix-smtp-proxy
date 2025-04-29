@@ -1,3 +1,8 @@
-# Format: sender,recipient ACTION message
-ben@togotrek.com,bengorash@gmail.com REJECT Blacklist rejection for sender1:user
-ben@togotrek.com,vengorash@live.com REJECT Blacklist rejection for sender2:user2
+# Blacklist for sender-recipient combinations
+# Format: user@example.com REJECT This email address is blocked
+
+# Example blacklist entries
+bengorash@gmail.com REJECT This recipient is blacklisted
+vengorash@live.com REJECT This recipient is blacklisted
+
+# You can add more entries as needed, one per line

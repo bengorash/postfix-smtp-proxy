@@ -1,1 +1,7 @@
-/@togotrek.com/     ${user}+relay@togotrek.com
+# Recipient address rewriting for preventing mail loops
+# Format: original_address modified_address
+
+# Example: Add a tag to certain recipients to prevent loops
+# user@example.com user+via-relay@example.com
+
+# No active rewritings by default - add your own as needed

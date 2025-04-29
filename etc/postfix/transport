@@ -1,1 +1,8 @@
-gmail.com    smtp:[smtp.gmail.com]:587
+# Transport mapping for different domains
+# Format: domain transport:nexthop
+
+# Direct routing for Gmail
+gmail.com smtp:[smtp.gmail.com]:587
+
+# Default route - deliver directly
+. smtp:

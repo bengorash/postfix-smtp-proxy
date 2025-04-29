@@ -1,24 +1,33 @@
-smtpd_banner = $myhostname ESMTP $mail_name
-myhostname = mail.togotrek.com
-mydomain = togotrek.com
-myorigin = $mydomain
-inet_interfaces = all
-mydestination = $myhostname, localhost.$mydomain, localhost
+# ==========================================================================
+# service type  private unpriv  chroot  wakeup  maxproc command + args
+#               (yes)   (yes)   (yes)   (never) (100)
+# ==========================================================================
+# SMTP service on port 25
+smtp      inet  n       -       n       -       -       smtpd
+# SMTP service for port 2525 (alternate)
+2525      inet  n       -       n       -       -       smtpd
 
-# Relay settings
-relay_domains = !togotrek.com, !gmail.com
-transport_maps = hash:/etc/postfix/transport
-
-# Rewriting and header checks
-recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
-header_checks = regexp:/etc/postfix/header_checks
-
-# Blacklist restrictions
-smtpd_recipient_restrictions =
-    check_sender_access hash:/etc/postfix/blacklist
-    permit_mynetworks
-    reject_unauth_destination
-
-# Compatibility and logging
-compatibility_level = 2
-syslog_facility = mail
+# Standard Postfix processes
+pickup    unix  n       -       n       60      1       pickup
+cleanup   unix  n       -       n       -       0       cleanup
+qmgr      unix  n       -       n       300     1       qmgr
+tlsmgr    unix  -       -       n       1000?   1       tlsmgr
+rewrite   unix  -       -       n       -       -       trivial-rewrite
+bounce    unix  -       -       n       -       0       bounce
+defer     unix  -       -       n       -       0       bounce
+trace     unix  -       -       n       -       0       bounce
+verify    unix  -       -       n       -       1       verify
+flush     unix  n       -       n       1000?   0       flush
+proxymap  unix  -       -       n       -       -       proxymap
+proxywrite unix -       -       n       -       1       proxymap
+smtp      unix  -       -       n       -       -       smtp
+relay     unix  -       -       n       -       -       smtp
+showq     unix  n       -       n       -       -       showq
+error     unix  -       -       n       -       -       error
+retry     unix  -       -       n       -       -       error
+discard   unix  -       -       n       -       -       discard
+local     unix  -       n       n       -       -       local
+virtual   unix  -       n       n       -       -       virtual
+lmtp      unix  -       -       n       -       -       lmtp
+anvil     unix  -       -       n       -       1       anvil
+scache    unix  -       -       n       -       1       scache

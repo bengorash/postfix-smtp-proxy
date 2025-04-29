@@ -1,7 +1,14 @@
-# Detect loops
-/^Received:.*togotrek\.com.*togotrek\.com/ REJECT Message loop detected
-/^X-Loop: togotrek.com/ REJECT Message loop detected
+# Header checks to detect and prevent mail loops
 
-# Add tracking headers
-/^To:/ PREPEND X-Loop: togotrek.com
-/^Received:/ PREPEND X-Processed: Processed by $myhostname at $smtp_date
+# Detect if this message has already been processed by this server
+/^X-Processed-By: SMTP-Proxy/ REJECT Loop detected: message has already been processed by this server
+
+# Add a custom header to mark messages processed by this server
+/^To:/ PREPEND X-Processed-By: SMTP-Proxy
+
+# Warning for messages with many Received headers (potentially looping)
+/^Received:/ WARN
+
+# Detect specific recipient patterns that might cause loops
+/^To:.*bengorash@gmail\.com.*/ WARN Potential blacklisted recipient
+/^To:.*vengorash@live\.com.*/ WARN Potential blacklisted recipient
