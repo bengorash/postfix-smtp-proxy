@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  postfix:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postfix
+    restart: always
+    ports:
+      - "587:587"
+    volumes:
+      - ./mail-data:/var/mail
+      - ./postfix-data:/var/spool/postfix
+    environment:
+      - HOSTNAME=mail.togotrek.com
