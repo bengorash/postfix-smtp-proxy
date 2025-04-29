@@ -6,20 +6,18 @@ inet_interfaces = all
 mydestination = $myhostname, localhost.$mydomain, localhost
 
 # Relay settings
-relay_domains = !togotrek.com, !gmail.com
-transport_maps = hash:/etc/postfix/transport
+relayhost = [smtp.gmail.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 
-# Rewriting and header checks
-recipient_canonical_maps = regexp:/etc/postfix/recipient_canonical
+# Loop prevention
 header_checks = regexp:/etc/postfix/header_checks
+relay_domains = !togotrek.com
 
-# Blacklist restrictions
-smtpd_recipient_restrictions =
-    check_sender_access hash:/etc/postfix/blacklist
-    permit_mynetworks
-    reject_unauth_destination
-
-# Compatibility and logging
+# Logging
 compatibility_level = 2
 syslog_facility = mail
 debug_peer_level = 3
