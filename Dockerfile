@@ -17,38 +17,40 @@ COPY etc/postfix/master.cf /etc/postfix/master.cf
 COPY etc/postfix/header_checks /etc/postfix/header_checks
 COPY etc/postfix/rsyslog.conf /etc/rsyslog.d/postfix.conf
 
-# Ensure log directories exist and have proper permissions
-RUN mkdir -p /var/log && \
-    touch /var/log/mail.log && \
-    chmod 644 /var/log/mail.log && \
-    chown syslog:adm /var/log/mail.log
-
-# Create a proper startup script with permissions fixes
+# Create a proper startup script
 RUN echo '#!/bin/bash\n\
-# Ensure log files have proper permissions\n\
-mkdir -p /var/log\n\
-touch /var/log/mail.log\n\
-chmod 644 /var/log/mail.log\n\
-chown syslog:adm /var/log/mail.log\n\
-\n\
-# Start rsyslog with proper configuration\n\
-rsyslogd -n &\n\
-\n\
-# Initialize Postfix directories\n\
-postfix stop || true\n\
+# Create necessary directories and pipes\n\
+mkdir -p /var/spool/postfix/public\n\
+mkdir -p /var/spool/postfix/private\n\
 mkdir -p /var/spool/postfix/pid\n\
 mkdir -p /var/mail\n\
 chmod 777 /var/mail\n\
 \n\
-# Start Postfix\n\
+# Ensure Postfix has right permissions\n\
+chown -R postfix:postfix /var/spool/postfix\n\
+\n\
+# Configure and start rsyslog\n\
+echo "*.* /var/log/mail.log" > /etc/rsyslog.d/mail.conf\n\
+mkdir -p /var/log\n\
+touch /var/log/mail.log\n\
+chmod 644 /var/log/mail.log\n\
+rsyslogd\n\
+\n\
+# Start Postfix with full initialization\n\
+postfix stop\n\
+sleep 1\n\
 postfix start\n\
+\n\
+# Verify Postfix initialization\n\
+sleep 2\n\
+ls -la /var/spool/postfix/public /var/spool/postfix/private >> /var/log/mail.log 2>&1\n\
 \n\
 # Keep container running\n\
 tail -f /var/log/mail.log\n\
 ' > /start-services.sh && chmod +x /start-services.sh
 
 # Expose ports
-EXPOSE 25
+EXPOSE 25 587
 
 # Start services
 CMD ["/start-services.sh"]
