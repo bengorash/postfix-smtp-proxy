@@ -5,6 +5,8 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y postfix rsyslog libterm-readline-perl-perl && \
     apt-get install -y --reinstall postfix && \
     postconf -e 'inet_interfaces = all' && \
+    echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections && \
+    echo "postfix postfix/mailname string mail.togotrek.com" | debconf-set-selections && \
     apt-get clean
 
 # Create mail.log and set permissions
