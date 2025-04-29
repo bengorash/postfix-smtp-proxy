@@ -1,0 +1,6 @@
+
+
+VeniaminGorash@smtp-proxy:/app/togotrek$ docker exec -it postfix netstat -tulnp | grep :25
+VeniaminGorash@smtp-proxy:/app/togotrek$ docker exec -it postfix postfix status
+postfix/postfix-script: the Postfix mail system is running: PID: 1
+VeniaminGorash@smtp-proxy:/app/togotrek$

@@ -3,6 +3,8 @@ FROM ubuntu:20.04
 # Install Postfix and rsyslog
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y postfix rsyslog && \
+    apt-get install -y --reinstall postfix && \
+    postconf -e 'inet_interfaces = all' && \
     apt-get clean
 
 # Copy Postfix configuration files
@@ -20,8 +22,9 @@ COPY etc/postfix/rsyslog.conf /etc/rsyslog.d/postfix.conf
 RUN postmap /etc/postfix/transport && \
     postmap /etc/postfix/blacklist
 
-# Configure logging
-RUN sed -i 's/#module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf && \
+# Configure rsyslog to avoid imklog errors
+RUN echo "module(load=\"imuxsock\")" > /etc/rsyslog.conf && \
+    sed -i 's/#module(load="imudp")/module(load="imudp")/' /etc/rsyslog.conf && \
     sed -i 's/#input(type="imudp" port="514")/input(type="imudp" port="514")/' /etc/rsyslog.conf
 
 # Expose SMTP port
