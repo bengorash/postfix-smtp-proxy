@@ -3,6 +3,7 @@ myhostname = mail.togotrek.com
 mydomain = togotrek.com
 myorigin = $mydomain
 inet_interfaces = all
+inet_protocols = all
 mydestination = $myhostname, localhost.$mydomain, localhost
 
 # Relay settings (no SASL, direct delivery for testing)

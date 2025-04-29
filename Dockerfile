@@ -14,9 +14,9 @@ RUN apt-get update && \
 
 # Create mail.log and debug.log with permissions
 RUN mkdir -p /var/log && \
-    touch /var/log/mail.log /var/log/mail.debug && \
-    chmod 644 /var/log/mail.log /var/log/mail.debug && \
-    chown syslog:adm /var/log/mail.log /var/log/mail.debug
+    touch /var/log/mail.log /var/log/mail.debug /var/log/syslog && \
+    chmod 644 /var/log/mail.log /var/log/mail.debug /var/log/syslog && \
+    chown syslog:adm /var/log/mail.log /var/log/mail.debug /var/log/syslog
 
 # Create all required Postfix directories with correct ownership
 RUN mkdir -p /var/spool/postfix /var/log/postfix \
@@ -25,19 +25,24 @@ RUN mkdir -p /var/spool/postfix /var/log/postfix \
     /var/spool/postfix/active /var/spool/postfix/bounce /var/spool/postfix/defer \
     /var/spool/postfix/deferred /var/spool/postfix/flush /var/spool/postfix/saved \
     /var/spool/postfix/trace /var/spool/postfix/corrupt && \
-    chown postfix:postfix /var/spool/postfix /var/log/postfix \
-    /var/spool/postfix/maildrop /var/spool/postfix/incoming \
-    /var/spool/postfix/active /var/spool/postfix/bounce /var/spool/postfix/defer \
-    /var/spool/postfix/deferred /var/spool/postfix/flush /var/spool/postfix/saved \
-    /var/spool/postfix/trace /var/spool/postfix/corrupt && \
-    chown postfix:postfix /var/spool/postfix/hold && \
-    chmod 700 /var/spool/postfix/hold && \
+    chown root:root /var/spool/postfix && \
+    chmod 755 /var/spool/postfix && \
     chown postfix:root /var/spool/postfix/pid /var/spool/postfix/etc && \
     chmod 755 /var/spool/postfix/pid /var/spool/postfix/etc && \
     chown postfix:postdrop /var/spool/postfix/public /var/spool/postfix/private && \
     chmod 755 /var/spool/postfix/public /var/spool/postfix/private && \
     chgrp postdrop /var/spool/postfix/public && \
-    chmod g+w /var/spool/postfix/public
+    chmod g+w /var/spool/postfix/public && \
+    chown postfix:postfix /var/spool/postfix/hold /var/spool/postfix/maildrop \
+    /var/spool/postfix/incoming /var/spool/postfix/active /var/spool/postfix/bounce \
+    /var/spool/postfix/defer /var/spool/postfix/deferred /var/spool/postfix/flush \
+    /var/spool/postfix/saved /var/spool/postfix/trace /var/spool/postfix/corrupt && \
+    chmod 700 /var/spool/postfix/hold /var/spool/postfix/maildrop \
+    /var/spool/postfix/incoming /var/spool/postfix/active /var/spool/postfix/bounce \
+    /var/spool/postfix/defer /var/spool/postfix/deferred /var/spool/postfix/flush \
+    /var/spool/postfix/saved /var/spool/postfix/trace /var/spool/postfix/corrupt && \
+    chown postfix:postfix /var/log/postfix && \
+    chmod 755 /var/log/postfix
 
 # Clean default Postfix configs
 RUN rm -rf /etc/postfix/* && \
