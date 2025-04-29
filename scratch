@@ -4,3 +4,10 @@ VeniaminGorash@smtp-proxy:/app/togotrek$ docker exec -it postfix netstat -tulnp 
 VeniaminGorash@smtp-proxy:/app/togotrek$ docker exec -it postfix postfix status
 postfix/postfix-script: the Postfix mail system is running: PID: 1
 VeniaminGorash@smtp-proxy:/app/togotrek$
+
+
+docker stop postfix
+docker rm postfix
+docker rm -f $(docker ps -aq)
+
+git clone https://github.com/bengorash/postfix-smtp-proxy.git
