@@ -17,24 +17,30 @@ COPY etc/postfix/master.cf /etc/postfix/master.cf
 COPY etc/postfix/header_checks /etc/postfix/header_checks
 COPY etc/postfix/rsyslog.conf /etc/rsyslog.d/postfix.conf
 
-# Create a proper startup script
+# Ensure log directories exist and have proper permissions
+RUN mkdir -p /var/log && \
+    touch /var/log/mail.log && \
+    chmod 644 /var/log/mail.log && \
+    chown syslog:adm /var/log/mail.log
+
+# Create a proper startup script with permissions fixes
 RUN echo '#!/bin/bash\n\
-# Properly initialize rsyslog\n\
-echo "*.* /var/log/mail.log" > /etc/rsyslog.d/50-default.conf\n\
+# Ensure log files have proper permissions\n\
 mkdir -p /var/log\n\
 touch /var/log/mail.log\n\
 chmod 644 /var/log/mail.log\n\
+chown syslog:adm /var/log/mail.log\n\
 \n\
-# Start rsyslog\n\
-service rsyslog start\n\
+# Start rsyslog with proper configuration\n\
+rsyslogd -n &\n\
 \n\
-# Properly initialize postfix directories\n\
+# Initialize Postfix directories\n\
 postfix stop || true\n\
 mkdir -p /var/spool/postfix/pid\n\
 mkdir -p /var/mail\n\
 chmod 777 /var/mail\n\
 \n\
-# Run postfix with full initialization\n\
+# Start Postfix\n\
 postfix start\n\
 \n\
 # Keep container running\n\
