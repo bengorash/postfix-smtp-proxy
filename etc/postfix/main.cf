@@ -6,7 +6,8 @@ mydomain = togotrek.com
 myorigin = $mydomain
 mydestination = $myhostname, localhost.$mydomain, localhost
 # Only listen on localhost and port 587
-inet_interfaces = loopback-only
+inet_interfaces = loopback-
+smtp_bind_address = 0.0.0.0:2525
 inet_protocols = all
 
 # Set trusted networks (adjust as needed)

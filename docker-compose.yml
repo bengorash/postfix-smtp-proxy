@@ -8,6 +8,7 @@ services:
     container_name: postfix
     restart: always
     ports:
+      - "2525:2525"
       - "587:587"
     volumes:
       - ./mail-data:/var/mail
