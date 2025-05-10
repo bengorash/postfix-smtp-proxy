@@ -41,7 +41,7 @@ COPY start-services.sh /start-services.sh
 RUN chmod +x /start-services.sh
 
 # Expose only port 587
-EXPOSE 587
+EXPOSE 2525
 
 # Start services
 CMD ["/start-services.sh"]
